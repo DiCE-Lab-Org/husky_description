@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+  A200 Clearpath hardware interface, ros2_control block.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="a200_ros2_control" params="serial_port:='/dev/clearpath/prolific'">
+    <ros2_control name="a200_hardware" type="system">
+      <hardware>
+        <plugin>clearpath_hardware_interfaces/A200Hardware</plugin>
+        <param name="wheel_diameter">0.3302</param>
+        <param name="max_accel">5.0</param>
+        <param name="max_speed">1.0</param>
+        <param name="polling_timeout">0.1</param>
+        <param name="serial_port">${serial_port}</param>
+      </hardware>
+
+      <xacro:macro name="wheel_iface" params="joint_name">
+        <joint name="${joint_name}">
+          <command_interface name="velocity">
+            <param name="min">-1</param>
+            <param name="max"> 1</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+      </xacro:macro>
+
+      <xacro:wheel_iface joint_name="front_left_wheel_joint"/>
+      <xacro:wheel_iface joint_name="rear_left_wheel_joint"/>
+      <xacro:wheel_iface joint_name="front_right_wheel_joint"/>
+      <xacro:wheel_iface joint_name="rear_right_wheel_joint"/>
+    </ros2_control>
+  </xacro:macro>
+
+</robot>

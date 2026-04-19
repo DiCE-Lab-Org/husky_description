@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!--
+  Husky bumper assembly (base + two extension posts + bumper mesh).
+
+  Parameters:
+    prefix  — e.g. "front" or "rear". Produces links like "${prefix}_bumper_link"
+    parent  — bumper mount link on the chassis (front_bumper_mount / rear_bumper_mount)
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="husky_bumper" params="prefix parent">
+
+    <!-- Base frame attached to the chassis mount -->
+    <link name="${prefix}_bumper_base_link"/>
+    <joint name="${prefix}_bumper_base_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <parent link="${parent}"/>
+      <child  link="${prefix}_bumper_base_link"/>
+    </joint>
+
+    <!-- Two extension posts -->
+    <xacro:macro name="bumper_post" params="name y">
+      <link name="${name}">
+        <visual>
+          <origin rpy="0 1.570795 0" xyz="0.003175 0 0"/>
+          <geometry>
+            <cylinder length="0.00635" radius="0.0095"/>
+          </geometry>
+          <material name="clearpath_dark_grey"/>
+        </visual>
+      </link>
+      <joint name="${name}_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0 ${y} 0"/>
+        <parent link="${prefix}_bumper_base_link"/>
+        <child  link="${name}"/>
+      </joint>
+    </xacro:macro>
+    <xacro:bumper_post name="${prefix}_bumper_extension_link_1" y=" 0.1084"/>
+    <xacro:bumper_post name="${prefix}_bumper_extension_link_2" y="-0.1084"/>
+
+    <!-- Extension mount (advances forward by post length) -->
+    <link name="${prefix}_bumper_extension_mount"/>
+    <joint name="${prefix}_bumper_extension_mount_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0.00635 0 0"/>
+      <parent link="${prefix}_bumper_base_link"/>
+      <child  link="${prefix}_bumper_extension_mount"/>
+    </joint>
+
+    <!-- Bumper body -->
+    <link name="${prefix}_bumper_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/clearpath_platform_description/meshes/a200/attachments/bumper.dae"/>
+        </geometry>
+      </visual>
+    </link>
+    <joint name="${prefix}_bumper_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0.075 0 0"/>
+      <parent link="${prefix}_bumper_extension_mount"/>
+      <child  link="${prefix}_bumper_link"/>
+    </joint>
+
+  </xacro:macro>
+</robot>

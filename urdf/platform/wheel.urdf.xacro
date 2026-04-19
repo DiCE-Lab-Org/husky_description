@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+  Husky A200 wheel macro.
+
+  Called four times from a200.urdf.xacro with different prefixes/origins.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="wheel_radius" value="0.1651"/>
+  <xacro:property name="wheel_length" value="0.1143"/>
+  <xacro:property name="wheel_mass"   value="2.637"/>
+
+  <xacro:macro name="husky_wheel" params="prefix parent xyz">
+    <link name="${prefix}_wheel">
+      <inertial>
+        <mass value="${wheel_mass}"/>
+        <origin xyz="0 0 0"/>
+        <inertia ixx="0.02467" ixy="0" ixz="0"
+                 iyy="0.04411" iyz="0"
+                 izz="0.02467"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/clearpath_platform_description/meshes/a200/wheel.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="1.570795 0 0" xyz="0 0 0"/>
+        <geometry>
+          <cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="${parent}"/>
+      <child  link="${prefix}_wheel"/>
+      <origin rpy="0 0 0" xyz="${xyz}"/>
+      <axis   xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<!--
+  Clearpath Husky A200 platform.
+
+  Provides:
+    * base_link / base_footprint / top_chassis / inertial
+    * Four wheels (instantiated via wheel macro)
+    * Bumper mount frames (front/rear) and default_mount
+    * Optional wheel-slip Gazebo plugin
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find husky_description)/urdf/platform/wheel.urdf.xacro"/>
+
+  <!-- Geometry constants -->
+  <xacro:property name="track"             value="0.555"/>   <!-- y distance between wheel centers -->
+  <xacro:property name="wheelbase"         value="0.512"/>   <!-- x distance between wheel centers -->
+  <xacro:property name="wheel_z_offset"    value="0.03282"/> <!-- wheel center height above base_link -->
+  <xacro:property name="base_footprint_z"  value="-0.13228"/>
+
+  <xacro:macro name="a200_platform" params="use_gazebo:=false">
+
+    <!-- ============ BASE LINK ============ -->
+    <link name="base_link">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/clearpath_platform_description/meshes/a200/base_link.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0.061875"/>
+        <geometry>
+          <box size="0.9874 0.5709 0.12375"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0.175625"/>
+        <geometry>
+          <box size="0.78992 0.5709 0.10375"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- ============ BASE FOOTPRINT ============ -->
+    <link name="base_footprint"/>
+    <joint name="base_footprint_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0 0 ${base_footprint_z}"/>
+      <parent link="base_link"/>
+      <child  link="base_footprint"/>
+    </joint>
+
+    <!-- ============ TOP CHASSIS ============ -->
+    <link name="top_chassis_link">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/clearpath_platform_description/meshes/a200/top_chassis.dae"/>
+        </geometry>
+      </visual>
+    </link>
+    <joint name="top_chassis_joint" type="fixed">
+      <parent link="base_link"/>
+      <child  link="top_chassis_link"/>
+    </joint>
+
+    <!-- ============ INERTIAL ============ -->
+    <link name="inertial_link">
+      <inertial>
+        <mass value="46.034"/>
+        <origin xyz="-0.00065 -0.085 0.062"/>
+        <inertia ixx="0.6022"  ixy="-0.02364" ixz="-0.1197"
+                 iyy="1.7386"  iyz="-0.001544"
+                 izz="2.0296"/>
+      </inertial>
+    </link>
+    <joint name="inertial_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <parent link="base_link"/>
+      <child  link="inertial_link"/>
+    </joint>
+
+    <!-- ============ WHEELS ============ -->
+    <xacro:husky_wheel prefix="front_left"  parent="base_link"
+                       xyz=" ${wheelbase/2}  ${track/2} ${wheel_z_offset}"/>
+    <xacro:husky_wheel prefix="front_right" parent="base_link"
+                       xyz=" ${wheelbase/2} -${track/2} ${wheel_z_offset}"/>
+    <xacro:husky_wheel prefix="rear_left"   parent="base_link"
+                       xyz="-${wheelbase/2}  ${track/2} ${wheel_z_offset}"/>
+    <xacro:husky_wheel prefix="rear_right"  parent="base_link"
+                       xyz="-${wheelbase/2} -${track/2} ${wheel_z_offset}"/>
+
+    <!-- ============ MOUNT FRAMES ============ -->
+    <link name="front_bumper_mount"/>
+    <joint name="front_bumper_mount_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0.406 0 0.091"/>
+      <parent link="base_link"/>
+      <child  link="front_bumper_mount"/>
+    </joint>
+
+    <link name="rear_bumper_mount"/>
+    <joint name="rear_bumper_mount_joint" type="fixed">
+      <origin rpy="0 0 3.14159" xyz="-0.406 0 0.091"/>
+      <parent link="base_link"/>
+      <child  link="rear_bumper_mount"/>
+    </joint>
+
+    <link name="default_mount"/>
+    <joint name="default_mount_joint" type="fixed">
+      <origin xyz="0.0 0.0 0.224"/>
+      <parent link="base_link"/>
+      <child  link="default_mount"/>
+    </joint>
+
+    <!-- ============ GAZEBO: WHEEL SLIP ============ -->
+    <xacro:if value="${use_gazebo}">
+      <gazebo>
+        <plugin filename="libignition-gazebo-wheel-slip-system.so"
+                name="ignition::gazebo::systems::WheelSlip">
+          <xacro:macro name="wheel_slip" params="link_name">
+            <wheel link_name="${link_name}">
+              <slip_compliance_lateral>1.0</slip_compliance_lateral>
+              <slip_compliance_longitudinal>1.0</slip_compliance_longitudinal>
+              <wheel_normal_force>113</wheel_normal_force>
+              <wheel_radius>${wheel_radius}</wheel_radius>
+            </wheel>
+          </xacro:macro>
+          <xacro:wheel_slip link_name="front_left_wheel"/>
+          <xacro:wheel_slip link_name="front_right_wheel"/>
+          <xacro:wheel_slip link_name="rear_left_wheel"/>
+          <xacro:wheel_slip link_name="rear_right_wheel"/>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+
+  </xacro:macro>
+</robot>

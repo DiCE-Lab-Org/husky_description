@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<!--
+  Intel RealSense D435 macro.
+
+  Produces:
+    ${prefix}_bottom_screw_frame   — mounting frame (origin of assembly)
+    ${prefix}_mount_bracket_link   — visual bracket
+    ${prefix}_link                 — camera body
+  plus a Gazebo rgbd_camera sensor when use_gazebo:=true.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="realsense_d435"
+               params="prefix parent xyz:='0 0 0' rpy:='0 0 0'
+                       topic:='/camera' use_gazebo:=false">
+
+    <!-- Mount point (origin at bottom screw) -->
+    <joint name="${prefix}_joint" type="fixed">
+      <origin rpy="${rpy}" xyz="${xyz}"/>
+      <parent link="${parent}"/>
+      <child  link="${prefix}_bottom_screw_frame"/>
+    </joint>
+    <link name="${prefix}_bottom_screw_frame"/>
+
+    <!-- Mount bracket visual -->
+    <link name="${prefix}_mount_bracket_link">
+      <visual>
+        <origin rpy="0 0 0" xyz="-0.0275 0 0"/>
+        <geometry>
+          <box size="0.055 0.02 0.04"/>
+        </geometry>
+        <material name="clearpath_dark_grey"/>
+      </visual>
+    </link>
+    <joint name="${prefix}_mount_bracket_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <parent link="${prefix}_bottom_screw_frame"/>
+      <child  link="${prefix}_mount_bracket_link"/>
+    </joint>
+
+    <!-- Camera body -->
+    <joint name="${prefix}_link_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0.0106 0.0175 0.0125"/>
+      <parent link="${prefix}_bottom_screw_frame"/>
+      <child  link="${prefix}_link"/>
+    </joint>
+    <link name="${prefix}_link">
+      <visual>
+        <!-- mesh origin is at front plate between the two IR camera axes -->
+        <origin rpy="${pi/2} 0 ${pi/2}" xyz="0.0043 -0.0175 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/realsense2_description/meshes/d435.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 -0.0175 0"/>
+        <geometry>
+          <box size="0.02505 0.09 0.025"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <!-- Not reliable — do not use for dynamics modeling -->
+        <mass value="0.072"/>
+        <origin xyz="0 0 0"/>
+        <inertia ixx="0.003881243" ixy="0.0" ixz="0.0"
+                 iyy="0.000498940" iyz="0.0"
+                 izz="0.003879257"/>
+      </inertial>
+    </link>
+
+    <!-- Gazebo RGBD sensor -->
+    <xacro:if value="${use_gazebo}">
+      <gazebo reference="${prefix}_link">
+        <sensor name="${prefix}" type="rgbd_camera">
+          <camera>
+            <horizontal_fov>1.25</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+            </image>
+            <clip>
+              <near>0.3</near>
+              <far>100</far>
+            </clip>
+            <ignition_frame_id>${prefix}_link</ignition_frame_id>
+            <optical_frame_id>${prefix}_color_optical_frame</optical_frame_id>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+          <ignition_frame_id>${prefix}_link</ignition_frame_id>
+          <topic>${topic}</topic>
+        </sensor>
+      </gazebo>
+    </xacro:if>
+
+  </xacro:macro>
+</robot>

@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<!--
+  Top-level Husky A200-0876 description.
+
+  This is the single entry point that composes all platform, accessory,
+  sensor and manipulator modules. Modify this file to add/remove
+  payloads rather than editing the sub-macros directly.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="a200_0876">
+
+  <!-- =========================================================== -->
+  <!--  ARGUMENTS                                                   -->
+  <!-- =========================================================== -->
+  <xacro:arg name="use_gazebo"         default="false"/>
+  <xacro:arg name="use_ros2_control"   default="true"/>
+  <xacro:arg name="serial_port"        default="/dev/clearpath/prolific"/>
+
+  <!-- =========================================================== -->
+  <!--  COMMON                                                      -->
+  <!-- =========================================================== -->
+  <xacro:include filename="$(find husky_description)/urdf/common/materials.xacro"/>
+
+  <!-- =========================================================== -->
+  <!--  PLATFORM (A200 chassis + wheels + inertial)                 -->
+  <!-- =========================================================== -->
+  <xacro:include filename="$(find husky_description)/urdf/platform/a200.urdf.xacro"/>
+  <xacro:a200_platform use_gazebo="$(arg use_gazebo)"/>
+
+  <!-- =========================================================== -->
+  <!--  ACCESSORIES                                                 -->
+  <!-- =========================================================== -->
+  <!-- Front bumper -->
+  <xacro:include filename="$(find husky_description)/urdf/accessories/bumper.urdf.xacro"/>
+  <xacro:husky_bumper prefix="front" parent="front_bumper_mount"/>
+
+  <!-- Dual-arm bulkhead (custom payload deck for this robot) -->
+  <xacro:include filename="$(find husky_description)/urdf/accessories/dual_arm_bulkhead.urdf.xacro"/>
+  <xacro:dual_arm_bulkhead parent="base_link" xyz="0 0 0.224" rpy="0 0 0"/>
+
+  <!-- =========================================================== -->
+  <!--  MANIPULATORS                                                -->
+  <!-- =========================================================== -->
+  <xacro:include filename="$(find husky_description)/urdf/manipulators/ur5e.urdf.xacro"/>
+  <xacro:include filename="$(find husky_description)/urdf/manipulators/robotiq_2f_85.urdf.xacro"/>
+
+  <!-- Left arm (arm_0) -->
+  <xacro:ur5e_arm prefix="arm_0" parent="dual_arm_bulkhead_link"
+                  xyz="0.1225  0.14891 0.13371" rpy="0.785398 0.0 3.14159"/>
+  <xacro:robotiq_2f_85 prefix="arm_0_gripper" parent="arm_0_tool0"/>
+
+  <!-- Right arm (arm_1) -->
+  <xacro:ur5e_arm prefix="arm_1" parent="dual_arm_bulkhead_link"
+                  xyz="0.1225 -0.14891 0.13371" rpy="0.785398 0.0 0.0"/>
+  <xacro:robotiq_2f_85 prefix="arm_1_gripper" parent="arm_1_tool0"/>
+
+  <!-- =========================================================== -->
+  <!--  SENSORS                                                     -->
+  <!-- =========================================================== -->
+  <!-- 3D Lidar on bulkhead -->
+  <xacro:include filename="$(find husky_description)/urdf/sensors/velodyne_vlp16.urdf.xacro"/>
+  <xacro:velodyne_vlp16 prefix="lidar3d_0" parent="dual_arm_bulkhead_link"
+                        xyz="0.35545 0.0 0.19744" rpy="0 0 0"
+                        topic="/sensors/lidar3d_0/scan"
+                        use_gazebo="$(arg use_gazebo)"/>
+
+  <!-- Wrist cameras (one per arm) -->
+  <xacro:include filename="$(find husky_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
+  <xacro:realsense_d435 prefix="camera_0" parent="arm_0_tool0"
+                        xyz="-0.08 0 0" rpy="0 -1.5708 0"
+                        topic="/sensors/camera_0"
+                        use_gazebo="$(arg use_gazebo)"/>
+  <xacro:realsense_d435 prefix="camera_1" parent="arm_1_tool0"
+                        xyz="-0.08 0 0" rpy="0 -1.5708 0"
+                        topic="/sensors/camera_1"
+                        use_gazebo="$(arg use_gazebo)"/>
+
+  <!-- IMU -->
+  <xacro:include filename="$(find husky_description)/urdf/sensors/imu.urdf.xacro"/>
+  <xacro:imu_sensor prefix="imu_0" parent="base_link"
+                    xyz="0 0 0" rpy="0 0 0"
+                    topic="/sensors/imu_0/data"
+                    use_gazebo="$(arg use_gazebo)"/>
+
+  <!-- GPS -->
+  <xacro:include filename="$(find husky_description)/urdf/sensors/gps.urdf.xacro"/>
+  <xacro:gps_sensor prefix="gps_0" parent="base_link"
+                    xyz="0 0 0" rpy="0 0 0"
+                    topic="/sensors/gps_0/navsat"
+                    use_gazebo="$(arg use_gazebo)"/>
+
+  <!-- =========================================================== -->
+  <!--  ROS2 CONTROL                                                -->
+  <!-- =========================================================== -->
+  <xacro:if value="$(arg use_ros2_control)">
+    <xacro:include filename="$(find husky_description)/urdf/control/a200_ros2_control.xacro"/>
+    <xacro:a200_ros2_control serial_port="$(arg serial_port)"/>
+  </xacro:if>
+
+</robot>

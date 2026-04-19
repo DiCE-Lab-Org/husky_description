@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+  Custom dual-arm bulkhead deck mounted on top of the Husky.
+  Provides the "dual_arm_bulkhead_link" frame used by both UR5e arms
+  and the 3D lidar.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="dual_arm_bulkhead" params="parent xyz:='0 0 0.224' rpy:='0 0 0'">
+    <link name="dual_arm_bulkhead_link">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/a200_0876_description/meshes/dual_arm_bulkhead.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/a200_0876_description/meshes/dual_arm_bulkhead_collision.stl"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="dual_arm_bulkhead_joint" type="fixed">
+      <origin rpy="${rpy}" xyz="${xyz}"/>
+      <parent link="${parent}"/>
+      <child  link="dual_arm_bulkhead_link"/>
+    </joint>
+  </xacro:macro>
+
+</robot>
