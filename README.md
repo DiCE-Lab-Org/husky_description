@@ -38,7 +38,7 @@ urdf/
 
 ---
 
-## ⚠️  Meshes
+##  Meshes
 
 All mesh references use `package://husky_description/meshes/...`.
 The original auto-generated URDF used absolute paths like
