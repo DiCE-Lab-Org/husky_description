@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!--
+  Robotis FR12-H104 bracket mounted on the pan output of the 2XL430.
+  Rotates left/right (yaw) around Z.
+
+  Pan limits: +/- 90 deg (+/-1.5708 rad).
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="fr12_h104_pan" params="prefix parent xyz:='0 0 0' rpy:='0 0 0'">
+
+    <link name="${prefix}_link">
+      <visual>
+        <origin rpy="0 1.5708 -1.5708" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/FR12-H104.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="clearpath_aluminum"/>
+      </visual>
+      <collision>
+        <origin rpy="0 1.5708 -1.5708" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/FR12-H104.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_pan_joint" type="revolute">
+      <parent link="${parent}"/>
+      <child  link="${prefix}_link"/>
+      <origin rpy="${rpy}" xyz="${xyz}"/>
+      <axis   xyz="0 0 1"/>
+      <limit  effort="4.1" lower="${-pi/2}" upper="${pi/2}" velocity="6.5"/>
+      <dynamics damping="0" friction="0"/>
+    </joint>
+
+  </xacro:macro>
+</robot>

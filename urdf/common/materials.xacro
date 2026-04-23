@@ -15,5 +15,5 @@
   <material name="clearpath_red">         <color rgba="1.00 0.00 0.00 1.0"/> </material>
   <material name="clearpath_aluminum">    <color rgba="0.50 0.50 0.50 1.0"/> </material>
   <material name="clearpath_plastic">     <color rgba="0.10 0.10 0.10 1.0"/> </material>
-
+  <material name="mount_olive_green">         <color rgba="0.42 0.47 0.12 1.0"/> </material>
 </robot>

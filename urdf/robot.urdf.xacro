@@ -37,6 +37,28 @@
   <xacro:include filename="$(find husky_description)/urdf/accessories/dual_arm_bulkhead.urdf.xacro"/>
   <xacro:dual_arm_bulkhead parent="base_link" xyz="0 0 0.224" rpy="0 0 0"/>
 
+  <!-- Custom camera mount on top of the bulkhead -->
+  <xacro:include filename="$(find husky_description)/urdf/accessories/camera_mount.urdf.xacro"/>
+  <xacro:camera_mount prefix="camera_mount" parent="dual_arm_bulkhead_link" xyz="0.20545 0.005 0.19744" rpy="0 0 0"/>
+
+  <!-- FR12 bracket on top of camera mount -->
+  <xacro:include filename="$(find husky_description)/urdf/accessories/fr12_bracket.urdf.xacro"/>
+  <xacro:fr12_bracket prefix="fr12_0" parent="camera_mount_link" xyz="0.125 -0.003 0.232" rpy="0 0 0"/>
+
+  <!-- 2XL430 servo (tilt axis) on top of FR12 bracket -->
+  <xacro:include filename="$(find husky_description)/urdf/accessories/dynamixel_2xl430.urdf.xacro"/>
+  <xacro:dynamixel_2xl430 prefix="tilt_0" parent="fr12_0_link" xyz="0 0 0" rpy="0 0 0"/>
+
+  <!-- FR12-H104 bracket on the pan output of the 2XL430 -->
+  <xacro:include filename="$(find husky_description)/urdf/accessories/fr12_h104_pan.urdf.xacro"/>
+  <xacro:fr12_h104_pan prefix="pan_0" parent="tilt_0_link" xyz="0.025 0 0" rpy="0 0 0"/>
+
+  <!-- Neck camera holder -->
+  <xacro:include filename="$(find husky_description)/urdf/accessories/neck_camera_holder.urdf.xacro"/>
+  <xacro:neck_camera_holder prefix="neck_0" parent="pan_0_link" xyz="0.038 -0.0025 0.034" rpy="0 0 0"/>
+
+  
+
   <!-- =========================================================== -->
   <!--  MANIPULATORS                                                -->
   <!-- =========================================================== -->
@@ -63,7 +85,7 @@
                         topic="/sensors/lidar3d_0/scan"
                         use_gazebo="$(arg use_gazebo)"/>
 
-  <!-- Wrist cameras (one per arm) -->
+  <!-- Wrist cameras (one per arm) and one neck camera -->
   <xacro:include filename="$(find husky_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
   <xacro:realsense_d435 prefix="camera_0" parent="arm_0_tool0"
                         xyz="-0.08 0 0" rpy="0 -1.5708 0"
@@ -73,6 +95,11 @@
                         xyz="-0.08 0 0" rpy="0 -1.5708 0"
                         topic="/sensors/camera_1"
                         use_gazebo="$(arg use_gazebo)"/>
+  <xacro:realsense_d435 prefix="camera_2" parent="neck_0_link"
+                        xyz="0.01 0.0 -0.025" rpy="0 0 0"
+                        topic="/sensors/camera_2"
+                        use_gazebo="$(arg use_gazebo)"
+                        show_bracket="false"/>
 
   <!-- IMU -->
   <xacro:include filename="$(find husky_description)/urdf/sensors/imu.urdf.xacro"/>
@@ -81,10 +108,11 @@
                     topic="/sensors/imu_0/data"
                     use_gazebo="$(arg use_gazebo)"/>
 
+
   <!-- GPS -->
   <xacro:include filename="$(find husky_description)/urdf/sensors/gps.urdf.xacro"/>
-  <xacro:gps_sensor prefix="gps_0" parent="base_link"
-                    xyz="0 0 0" rpy="0 0 0"
+  <xacro:gps_sensor prefix="gps_0" parent="dual_arm_bulkhead_link"
+                    xyz="-0.20 0 0.19744" rpy="0 0 0"
                     topic="/sensors/gps_0/navsat"
                     use_gazebo="$(arg use_gazebo)"/>
 

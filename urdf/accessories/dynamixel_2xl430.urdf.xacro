@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!--
+  Dynamixel 2XL430-W250 servo (used as the tilt axis).
+  Produces one link (${prefix}_link) that rotates about Y relative to parent.
+  Tilt limits: +/- 90 deg (+/-1.5708 rad).
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="dynamixel_2xl430" params="prefix parent xyz:='0 0 0' rpy:='0 0 0'">
+
+    <link name="${prefix}_link">
+      <visual>
+        <origin rpy="0 0 -1.5708" xyz="0.0125 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/2XL_430.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="clearpath_dark_grey"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 -1.5708" xyz="0.0125 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/2XL_430.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_tilt_joint" type="revolute">
+      <parent link="${parent}"/>
+      <child  link="${prefix}_link"/>
+      <origin rpy="${rpy}" xyz="${xyz}"/>
+      <axis   xyz="0 1 0"/>
+      <limit  effort="4.1" lower="${-pi/2}" upper="${pi/2}" velocity="6.5"/>
+      <dynamics damping="0" friction="0"/>
+    </joint>
+
+  </xacro:macro>
+</robot>

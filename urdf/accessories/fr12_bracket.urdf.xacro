@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+  Robotis FR12-H103GM Dynamixel bracket/frame.
+  Mounts on top of the custom camera_mount and holds the 3rd RealSense D435.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="fr12_bracket" params="prefix parent xyz:='0 0 0' rpy:='0 0 0'">
+    <link name="${prefix}_link">
+      <visual>
+        <origin rpy="0 0 1.5708" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/fr12_h103gm.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="clearpath_aluminum"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 1.5708" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/fr12_h103gm.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}_joint" type="fixed">
+      <origin rpy="${rpy}" xyz="${xyz}"/>
+      <parent link="${parent}"/>
+      <child  link="${prefix}_link"/>
+    </joint>
+  </xacro:macro>
+</robot>

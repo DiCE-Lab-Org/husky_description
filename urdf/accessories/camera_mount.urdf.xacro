@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+  Custom camera mount that sits on top of the dual-arm bulkhead
+  and holds the 3rd RealSense D435.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="camera_mount" params="prefix parent xyz:='0 0 0' rpy:='0 0 0'">
+    <link name="${prefix}_link">
+      <visual>
+        <origin rpy="0 0 -1.5708" xyz="0 0.075 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/camera_mount.stl"
+                scale="0.01 0.01 0.01"/>
+        </geometry>
+        <material name="mount_olive_green"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 -1.5708" xyz="0 0.075 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/camera_mount.stl"
+                scale="0.01 0.01 0.01"/>
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}_joint" type="fixed">
+      <origin rpy="${rpy}" xyz="${xyz}"/>
+      <parent link="${parent}"/>
+      <child  link="${prefix}_link"/>
+    </joint>
+  </xacro:macro>
+</robot>

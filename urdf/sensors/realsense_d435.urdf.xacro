@@ -11,8 +11,9 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="realsense_d435"
-               params="prefix parent xyz:='0 0 0' rpy:='0 0 0'
-                       topic:='/camera' use_gazebo:=false">
+                params="prefix parent xyz:='0 0 0' rpy:='0 0 0'
+                       topic:='/camera' use_gazebo:=false
+                       show_bracket:=true">
 
     <!-- Mount point (origin at bottom screw) -->
     <joint name="${prefix}_joint" type="fixed">
@@ -22,21 +23,23 @@
     </joint>
     <link name="${prefix}_bottom_screw_frame"/>
 
-    <!-- Mount bracket visual -->
-    <link name="${prefix}_mount_bracket_link">
-      <visual>
-        <origin rpy="0 0 0" xyz="-0.0275 0 0"/>
-        <geometry>
-          <box size="0.055 0.02 0.04"/>
-        </geometry>
-        <material name="clearpath_dark_grey"/>
-      </visual>
-    </link>
-    <joint name="${prefix}_mount_bracket_joint" type="fixed">
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <parent link="${prefix}_bottom_screw_frame"/>
-      <child  link="${prefix}_mount_bracket_link"/>
-    </joint>
+  <!-- Mount bracket visual (optional) -->
+  <xacro:if value="${show_bracket}">
+  <link name="${prefix}_mount_bracket_link">
+  <visual>
+  <origin rpy="0 0 0" xyz="-0.0275 0 0"/>
+  <geometry>
+  <box size="0.055 0.02 0.04"/>
+  </geometry>
+  <material name="clearpath_dark_grey"/>
+  </visual>
+  </link>
+  <joint name="${prefix}_mount_bracket_joint" type="fixed">
+  <origin rpy="0 0 0" xyz="0 0 0"/>
+  <parent link="${prefix}_bottom_screw_frame"/>
+  <child  link="${prefix}_mount_bracket_link"/>
+  </joint>
+  </xacro:if>
 
     <!-- Camera body -->
     <joint name="${prefix}_link_joint" type="fixed">
