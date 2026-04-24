@@ -1,11 +1,15 @@
 # husky_description
 
+
+![Husky A200 with dual UR5e and pan-tilt neck camera](docs/demo.gif)
+
 Modular xacro description for **Clearpath Husky A200-0876** with:
 
 - 2 × **UR5e** arms on a custom dual-arm bulkhead
 - 2 × **Robotiq 2F-85** grippers (one per arm wrist)
 - **Velodyne VLP-16** 3D lidar
-- 2 × **Intel RealSense D435** (wrist-mounted)
+- 3 × **Intel RealSense D435** (2 wrist-mounted, 1 on pan-tilt neck)
+- **Dynamixel 2XL430** pan-tilt servo on a custom neck mount (FR12 brackets)
 - IMU and Swift GPS antenna
 - Front bumper
 - Optional `ros2_control` block for the Clearpath A200Hardware plugin
@@ -18,16 +22,21 @@ Modular xacro description for **Clearpath Husky A200-0876** with:
 ```
 urdf/
 ├── robot.urdf.xacro              # top-level, composes everything
-├── common/materials.xacro        # Clearpath color palette
+├── common/materials.xacro        # Clearpath palette + olive green
 ├── platform/
 │   ├── a200.urdf.xacro           # base_link, inertial, mounts, chassis
 │   └── wheel.urdf.xacro          # wheel macro (called x4)
 ├── accessories/
 │   ├── bumper.urdf.xacro
-│   └── dual_arm_bulkhead.urdf.xacro
+│   ├── dual_arm_bulkhead.urdf.xacro
+│   ├── camera_mount.urdf.xacro       # custom neck base
+│   ├── fr12_bracket.urdf.xacro       # Robotis FR12-H103GM (base of pan-tilt)
+│   ├── dynamixel_2xl430.urdf.xacro   # tilt joint (revolute, Y)
+│   ├── fr12_h104_pan.urdf.xacro      # pan joint (revolute, Z)
+│   └── neck_camera_holder.urdf.xacro # rigid camera holder on pan output
 ├── sensors/
 │   ├── velodyne_vlp16.urdf.xacro
-│   ├── realsense_d435.urdf.xacro
+│   ├── realsense_d435.urdf.xacro     # show_bracket param to toggle mount bracket
 │   ├── imu.urdf.xacro
 │   └── gps.urdf.xacro
 ├── manipulators/
@@ -38,35 +47,30 @@ urdf/
 
 ---
 
-##  Meshes
+## Meshes
 
 All mesh references use `package://husky_description/meshes/...`.
-The original auto-generated URDF used absolute paths like
-`file:///home/hesam/Desktop/husky/meshes/...`.
 
-Before building, copy (or symlink) the mesh trees into this package:
+Mesh folders in this package:
 
-```bash
-cd ~/Desktop/husky-dev/ros2_ws/src/husky_description
-ln -s ~/Desktop/husky/meshes/clearpath_platform_description     meshes/clearpath_platform_description
-ln -s ~/Desktop/husky/meshes/clearpath_sensors_description      meshes/clearpath_sensors_description
-ln -s ~/Desktop/husky/meshes/velodyne_description                meshes/velodyne_description
-ln -s ~/Desktop/husky/meshes/realsense2_description              meshes/realsense2_description
-ln -s ~/Desktop/husky/meshes/ur_description                      meshes/ur_description
-ln -s ~/Desktop/husky/meshes/robotiq_description                 meshes/robotiq_description
-ln -s ~/Desktop/husky/meshes/a200_0876_description               meshes/a200_0876_description
-```
+- `a200_0876_description/` — custom parts specific to unit 0876 (dual-arm bulkhead)
+- `clearpath_platform_description/` — Husky chassis, wheels, attachments
+- `clearpath_sensors_description/` — Swift GPS antenna, other sensors
+- `velodyne_description/` — VLP-16 lidar
+- `realsense2_description/` — RealSense D435
+- `ur_description/` — UR5e arms
+- `robotiq_description/` — 2F-85 gripper
+- `mount_description/` — custom pan-tilt neck mount (camera_mount, FR12 brackets, 2XL430, neck holder)
 
-> Use symlinks during development, replace with a real copy before
-> distributing the package.
+> STL files for the mount must be **binary** format. If you export from FreeCAD, make sure binary is selected, or convert with `admesh -b out.stl in.stl`.
 
 ---
 
 ## Build & view
 
 ```bash
-cd ~/Desktop/husky-dev/ros2_ws
-colcon build --packages-select husky_description
+cd ~/ros2_ws
+colcon build --packages-select husky_description --symlink-install
 source install/setup.bash
 
 # RViz + jsp_gui (default)
