@@ -14,12 +14,13 @@
         </geometry>
       </visual>
       <collision>
-        <origin xyz="0 0 0.0324"/>
+        <origin xyz="0 0 0.0325"/>
         <geometry>
-          <sphere radius="0.1122"/>
+          <box size="0.152 0.152 0.065"/>
         </geometry>
       </collision>
     </link>
+    
 
     <joint name="${prefix}_joint" type="fixed">
       <origin rpy="${rpy}" xyz="${xyz}"/>
