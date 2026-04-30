@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+  ros2_control hardware block for the neck pan/tilt subsystem.
+
+  Uses the dynamixel_hardware/DynamixelHardware plugin from
+  github.com/dynamixel-community/dynamixel_hardware.
+
+  In dummy mode (use_dummy=true) the plugin echoes commanded positions
+  back as state — perfect for sim/VR testing without real Dynamixels.
+  When real motors are connected, set use_dummy=false and configure
+  usb_port/baud_rate appropriately.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="neck_ros2_control" params="name use_dummy:='true' usb_port:='/dev/ttyUSB0' baud_rate:='1000000'">
+
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>dynamixel_hardware/DynamixelHardware</plugin>
+        <param name="usb_port">${usb_port}</param>
+        <param name="baud_rate">${baud_rate}</param>
+        <param name="use_dummy">${use_dummy}</param>
+      </hardware>
+
+      <joint name="tilt_0_tilt_joint">
+        <param name="id">1</param>
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <joint name="pan_0_pan_joint">
+        <param name="id">2</param>
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+    </ros2_control>
+
+  </xacro:macro>
+</robot>
