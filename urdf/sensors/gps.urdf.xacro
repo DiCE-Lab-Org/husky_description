@@ -1,31 +1,53 @@
 <?xml version="1.0"?>
-<!-- Swift GPS antenna macro. -->
+<!--
+  Swift Navigation GPS macro:
+    - ${prefix}_link        - Duro receiver (yellow box on parent)
+    - ${prefix}_antenna     - Swift antenna (white puck on top of receiver)
+  Two separate links because RViz has a long-standing bug where multiple
+  <visual> tags on a single link all get the first material's color.
+  See https://github.com/ros2/rviz/issues/1293
+-->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-
   <xacro:macro name="gps_sensor"
                params="prefix parent xyz:='0 0 0' rpy:='0 0 0'
                        topic:='/navsat' use_gazebo:=false">
 
+    <!-- Receiver -->
     <link name="${prefix}_link">
+      <visual>
+        <material name="clearpath_yellow"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/duro_receiver.STL"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.013 0 -0.007" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.152 0.152 0.144"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_joint" type="fixed">
+      <origin rpy="${rpy}" xyz="${xyz}"/>
+      <parent link="${parent}"/>
+      <child  link="${prefix}_link"/>
+    </joint>
+
+    <!-- Antenna sits at receiver's top face -->
+    <link name="${prefix}_antenna">
       <visual>
         <material name="clearpath_white"/>
         <geometry>
           <mesh filename="package://husky_description/meshes/clearpath_sensors_description/meshes/swift_antenna.stl"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="0 0 0.0325"/>
-        <geometry>
-          <box size="0.152 0.152 0.065"/>
-        </geometry>
-      </collision>
     </link>
-    
 
-    <joint name="${prefix}_joint" type="fixed">
-      <origin rpy="${rpy}" xyz="${xyz}"/>
-      <parent link="${parent}"/>
-      <child  link="${prefix}_link"/>
+    <joint name="${prefix}_antenna_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="${prefix}_link"/>
+      <child  link="${prefix}_antenna"/>
     </joint>
 
     <xacro:if value="${use_gazebo}">

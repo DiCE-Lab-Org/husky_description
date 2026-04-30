@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+  Wrist mount that bolts onto the UR arm flange (tool0).
+  Provides a flat surface for the fath_pivot_mount + camera.
+
+  mesh_rpy is applied to the visual+collision origin so the joint can
+  stay rpy="0 0 0" while the mesh sits in the desired orientation.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="wrist_mount" params="prefix parent xyz:='0 0 0' rpy:='0 0 0' mesh_rpy:='0 0 0'">
+    <link name="${prefix}_link">
+      <visual>
+        <origin rpy="${mesh_rpy}" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/wrist_mount.STL"/>
+        </geometry>
+        <material name="clearpath_black"/>
+      </visual>
+      <collision>
+        <origin rpy="${mesh_rpy}" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/wrist_mount.STL"/>
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}_joint" type="fixed">
+      <origin rpy="${rpy}" xyz="${xyz}"/>
+      <parent link="${parent}"/>
+      <child  link="${prefix}_link"/>
+    </joint>
+  </xacro:macro>
+</robot>

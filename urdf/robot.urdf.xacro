@@ -85,16 +85,51 @@
                         topic="/sensors/lidar3d_0/scan"
                         use_gazebo="$(arg use_gazebo)"/>
 
-  <!-- Wrist cameras (one per arm) and one neck camera -->
+  <!-- Wrist mounts + Fath pivots + RealSense cameras (one chain per arm) -->
+  <xacro:include filename="$(find husky_description)/urdf/accessories/wrist_mount.urdf.xacro"/>
+  <xacro:include filename="$(find husky_description)/urdf/accessories/fath_pivot_mount.urdf.xacro"/>
   <xacro:include filename="$(find husky_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
-  <xacro:realsense_d435 prefix="camera_0" parent="arm_0_tool0"
-                        xyz="-0.08 0 0" rpy="0 -1.5708 0"
+
+  <!-- Left arm camera -->
+  <xacro:wrist_mount prefix="arm_0_wrist_mount" parent="arm_0_tool0"
+                    xyz="0 0 0" rpy="0 0 0"
+                    mesh_rpy="0 1.5708 -1.5708"/>
+  <!-- Alignment frame: lives in the rotated frame so children's poses stay valid -->
+  <link name="arm_0_wrist_mount_aligned"/>
+  <joint name="arm_0_wrist_mount_aligned_joint" type="fixed">
+    <parent link="arm_0_wrist_mount_link"/>
+    <child  link="arm_0_wrist_mount_aligned"/>
+    <origin xyz="0 0 0" rpy="0 1.5708 -1.5708"/>
+  </joint>
+  <xacro:fath_pivot_mount prefix="arm_0_pivot" parent="arm_0_wrist_mount_aligned"
+                          angle="${pi/12}"
+                          xyz="-0.01615 0 0.05842" rpy="0 0 3.14159"/>
+  <xacro:realsense_d435 prefix="camera_0" parent="arm_0_pivot_mount"
+                        xyz="0 0 0" rpy="0 0 0"
                         topic="/sensors/camera_0"
-                        use_gazebo="$(arg use_gazebo)"/>
-  <xacro:realsense_d435 prefix="camera_1" parent="arm_1_tool0"
-                        xyz="-0.08 0 0" rpy="0 -1.5708 0"
+                        use_gazebo="$(arg use_gazebo)"
+                        show_bracket="false"/>
+
+  <!-- Right arm camera -->
+  <xacro:wrist_mount prefix="arm_1_wrist_mount" parent="arm_1_tool0"
+                    xyz="0 0 0" rpy="0 0 0"
+                    mesh_rpy="0 1.5708 1.5708"/>
+  <!-- Alignment frame -->
+  <link name="arm_1_wrist_mount_aligned"/>
+  <joint name="arm_1_wrist_mount_aligned_joint" type="fixed">
+    <parent link="arm_1_wrist_mount_link"/>
+    <child  link="arm_1_wrist_mount_aligned"/>
+    <origin xyz="0 0 0" rpy="0 1.5708 1.5708"/>
+  </joint>
+  <xacro:fath_pivot_mount prefix="arm_1_pivot" parent="arm_1_wrist_mount_aligned"
+                          angle="${pi/12}"
+                          xyz="-0.01615 0 0.05842" rpy="0 0 3.14159"/>
+  <xacro:realsense_d435 prefix="camera_1" parent="arm_1_pivot_mount"
+                        xyz="0 0 0" rpy="0 0 0"
                         topic="/sensors/camera_1"
-                        use_gazebo="$(arg use_gazebo)"/>
+                        use_gazebo="$(arg use_gazebo)"
+                        show_bracket="false"/>
+
   <xacro:realsense_d435 prefix="camera_2" parent="neck_0_link"
                         xyz="0.01 0.0 -0.025" rpy="0 0 0"
                         topic="/sensors/camera_2"
@@ -112,7 +147,7 @@
   <!-- GPS -->
   <xacro:include filename="$(find husky_description)/urdf/sensors/gps.urdf.xacro"/>
   <xacro:gps_sensor prefix="gps_0" parent="dual_arm_bulkhead_link"
-                    xyz="-0.20 0 0.19744" rpy="0 0 0"
+                    xyz="-0.20 0 0.27617" rpy="0 0 0"
                     topic="/sensors/gps_0/navsat"
                     use_gazebo="$(arg use_gazebo)"/>
 
