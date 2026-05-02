@@ -9,9 +9,15 @@
   back as state — perfect for sim/VR testing without real Dynamixels.
   When real motors are connected, set use_dummy=false and configure
   usb_port/baud_rate appropriately.
+
+  Hardware verified 2026-05-01:
+    - Motors are XL430-W250 (model 1090, 2XL430 dual package)
+    - Bus baud: 57600
+    - ID 1 = pan (left/right axis)
+    - ID 2 = tilt (up/down axis)
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="neck_ros2_control" params="name use_dummy:='true' usb_port:='/dev/ttyUSB0' baud_rate:='1000000'">
+  <xacro:macro name="neck_ros2_control" params="name use_dummy:='true' usb_port:='/dev/ttyUSB0' baud_rate:='57600'">
 
     <ros2_control name="${name}" type="system">
       <hardware>
@@ -22,14 +28,14 @@
       </hardware>
 
       <joint name="tilt_0_tilt_joint">
-        <param name="id">1</param>
+        <param name="id">2</param>
         <command_interface name="position"/>
         <state_interface name="position"/>
         <state_interface name="velocity"/>
       </joint>
 
       <joint name="pan_0_pan_joint">
-        <param name="id">2</param>
+        <param name="id">1</param>
         <command_interface name="position"/>
         <state_interface name="position"/>
         <state_interface name="velocity"/>
