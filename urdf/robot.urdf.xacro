@@ -55,10 +55,7 @@
 
   <!-- Neck camera holder -->
   <xacro:include filename="$(find husky_description)/urdf/accessories/neck_camera_holder.urdf.xacro"/>
-  <xacro:neck_camera_holder prefix="neck_0" parent="pan_0_link" xyz="0.038 -0.0025 0.034" rpy="0 0 0"/>
-
-  
-
+  <xacro:neck_camera_holder prefix="neck_0" parent="pan_0_link" xyz="0 0 0" rpy="0 0 0"/>
   <!-- =========================================================== -->
   <!--  MANIPULATORS                                                -->
   <!-- =========================================================== -->
@@ -130,13 +127,10 @@
                         use_gazebo="$(arg use_gazebo)"
                         show_bracket="false"/>
 
-  <xacro:realsense_d435 prefix="camera_2" parent="neck_0_link"
-                        xyz="0.01 0.0 -0.025" rpy="0 0 0"
-                        topic="/sensors/camera_2"
-                        use_gazebo="$(arg use_gazebo)"
-                        show_bracket="false"/>
-
-  <!-- IMU -->
+<!-- Neck ZED Mini camera (camera_2) -->
+  <xacro:include filename="$(find husky_description)/urdf/sensors/zed_mini.urdf.xacro"/>
+  <xacro:zed_mini prefix="camera_2" parent="neck_0_link"
+                  xyz="0 0 0" rpy="0 0 0"/>
   <xacro:include filename="$(find husky_description)/urdf/sensors/imu.urdf.xacro"/>
   <xacro:imu_sensor prefix="imu_0" parent="base_link"
                     xyz="0 0 0" rpy="0 0 0"

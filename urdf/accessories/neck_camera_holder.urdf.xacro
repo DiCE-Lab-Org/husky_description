@@ -1,24 +1,24 @@
 <?xml version="1.0"?>
 <!--
   Neck camera holder - rigid bracket bolted to the FR12-H104 pan bracket.
-  Holds the 3rd RealSense D435 camera.
+  Holds the ZED camera.
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:macro name="neck_camera_holder" params="prefix parent xyz:='0 0 0' rpy:='0 0 0'">
 
     <link name="${prefix}_link">
       <visual>
-        <origin rpy="-1.5708 0 1.5708" xyz="0 0 0"/>
+        <origin rpy="0 0 1.5708" xyz="0.0425 0.02 -0.01"/>
         <geometry>
-          <mesh filename="package://husky_description/meshes/mount_description/neck_camera_holder.stl"
+          <mesh filename="package://husky_description/meshes/mount_description/ZED_mount.stl"
                 scale="0.001 0.001 0.001"/>
         </geometry>
-        <material name="mount_olive_green"/>
+        <material name="clearpath_black"/>
       </visual>
       <collision>
-        <origin rpy="-1.5708 0 1.5708" xyz="0 0 0"/>
+        <origin rpy="0 0 1.5708" xyz="0.0425 0.02 -0.01"/>
         <geometry>
-          <mesh filename="package://husky_description/meshes/mount_description/neck_camera_holder.stl"
+          <mesh filename="package://husky_description/meshes/mount_description/ZED_mount.stl"
                 scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>

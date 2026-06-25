@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+  Stereolabs ZED Mini stereo camera (neck camera_2).
+  Appearance/frames for RViz. Mesh is in METERS (scale 1 1 1).
+  Gazebo stereo sensor + optical frames can be added later behind use_gazebo.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="zed_mini"
+               params="prefix parent xyz:='0 0 0' rpy:='0 0 0'">
+
+    <!-- Mount frame: origin of the camera assembly on the holder -->
+    <joint name="${prefix}_joint" type="fixed">
+      <origin rpy="${rpy}" xyz="${xyz}"/>
+      <parent link="${parent}"/>
+      <child  link="${prefix}_link"/>
+    </joint>
+
+    <link name="${prefix}_link">
+      <visual>
+        <origin rpy="0 0 -1.5708" xyz="0.031 0.0065 0.025"/>
+        <geometry>
+          <mesh filename="package://husky_description/meshes/mount_description/ZEDM_bin.stl"
+                scale="1 1 1"/>
+        </geometry>
+        <material name="clearpath_dark_grey"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 -1.5708" xyz="0.031 0.0065 0.025"/>
+        <geometry>
+          <box size="0.125 0.030 0.027"/>
+        </geometry>
+      </collision>
+    </link>
+
+  </xacro:macro>
+</robot>

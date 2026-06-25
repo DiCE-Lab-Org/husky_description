@@ -8,7 +8,7 @@ Modular xacro description for **Clearpath Husky A200-0876** with:
 - 2 × **UR5e** arms on a custom dual-arm bulkhead
 - 2 × **Robotiq 2F-85** grippers (one per arm wrist)
 - **Velodyne VLP-16** 3D lidar
-- 3 × **Intel RealSense D435** (2 wrist-mounted, 1 on pan-tilt neck)
+- 2 × **Intel RealSense D435** (wrist-mounted) + 1 × **Stereolabs ZED Mini** on the pan-tilt neck
 - **Dynamixel 2XL430** pan-tilt servo on a custom neck mount (FR12 brackets)
 - IMU and Swift GPS antenna
 - Front bumper
@@ -33,10 +33,11 @@ urdf/
 │   ├── fr12_bracket.urdf.xacro       # Robotis FR12-H103GM (base of pan-tilt)
 │   ├── dynamixel_2xl430.urdf.xacro   # tilt joint (revolute, Y)
 │   ├── fr12_h104_pan.urdf.xacro      # pan joint (revolute, Z)
-│   └── neck_camera_holder.urdf.xacro # rigid camera holder on pan output
+│   └── neck_camera_holder.urdf.xacro # rigid camera holder on pan output (ZED mount)
 ├── sensors/
 │   ├── velodyne_vlp16.urdf.xacro
 │   ├── realsense_d435.urdf.xacro     # show_bracket param to toggle mount bracket
+│   ├── zed_mini.urdf.xacro           # neck ZED Mini (camera_2)
 │   ├── imu.urdf.xacro
 │   └── gps.urdf.xacro
 ├── manipulators/
@@ -60,7 +61,7 @@ Mesh folders in this package:
 - `realsense2_description/` — RealSense D435
 - `ur_description/` — UR5e arms
 - `robotiq_description/` — 2F-85 gripper
-- `mount_description/` — custom pan-tilt neck mount (camera_mount, FR12 brackets, 2XL430, neck holder)
+- `mount_description/` — custom pan-tilt neck mount (camera_mount, FR12 brackets, 2XL430, ZED mount + ZED Mini)
 
 > STL files for the mount must be **binary** format. If you export from FreeCAD, make sure binary is selected, or convert with `admesh -b out.stl in.stl`.
 
@@ -81,13 +82,6 @@ ros2 launch husky_description view_robot.launch.py use_gazebo:=true
 
 # with ros2_control block embedded
 ros2 launch husky_description view_robot.launch.py use_ros2_control:=true
-```
-
-Sanity-check the xacro without launching anything:
-
-```bash
-xacro src/husky_description/urdf/robot.urdf.xacro > /tmp/robot.urdf
-check_urdf /tmp/robot.urdf
 ```
 
 ---
