@@ -1,37 +1,90 @@
 <?xml version="1.0"?>
 <!--
-  Stereolabs ZED Mini stereo camera (neck camera_2).
-  Appearance/frames for RViz. Mesh is in METERS (scale 1 1 1).
-  Gazebo stereo sensor + optical frames can be added later behind use_gazebo.
+  ZED Mini (camera_2) - local macro.
+
+  Reproduces the EXACT frame geometry of Stereolabs' official zed_description
+  'zedm' model (constants copied verbatim from zed_macro.urdf.xacro):
+      baseline=0.063  height=0.0265  bottom_slope=0  optical_offset_x=0
+      screw_offset_x=0  screw_offset_z=0
+  Frame names and tree match the official wrapper exactly, so TF lines up with
+  the ZED ROS 2 node.
+
+  Why a local macro instead of <xacro:zed_camera>: the official macro hard-codes
+  a BLACK 'zedm_mat' material, and a URDF cannot redefine a material name
+  (urdfdom: "material 'zedm_mat' is not unique" -> fatal). This copy is identical
+  geometry but lets us pick the colour. The visual mesh still comes from the
+  installed zed_description package.
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="zed_mini"
-               params="prefix parent xyz:='0 0 0' rpy:='0 0 0'">
+  <material name="zed_gray"><color rgba="0.5 0.5 0.5 1.0"/></material>
 
-    <!-- Mount frame: origin of the camera assembly on the holder -->
-    <joint name="${prefix}_joint" type="fixed">
-      <origin rpy="${rpy}" xyz="${xyz}"/>
-      <parent link="${parent}"/>
-      <child  link="${prefix}_link"/>
-    </joint>
+  <xacro:macro name="zed_mini" params="name">
+    <xacro:property name="baseline"         value="0.063"/>
+    <xacro:property name="height"           value="0.0265"/>
+    <xacro:property name="bottom_slope"     value="0.0"/>
+    <xacro:property name="optical_offset_x" value="0.0"/>
+    <xacro:property name="screw_offset_x"   value="0.0"/>
+    <xacro:property name="screw_offset_z"   value="0.0"/>
 
-    <link name="${prefix}_link">
+    <!-- Mounting point (threaded screw hole in the bottom) -->
+    <link name="${name}_camera_link"/>
+
+    <!-- Camera body center (mesh lives here).
+         Visual uses the ORIGINAL official zed_description mesh, which is already
+         aligned to the camera_center frame (X-fwd, Y-left, Z-up), so no yaw/recenter
+         is needed (mesh origin = body center, like the official macro). VISUAL ONLY -
+         does not affect any TF/extrinsic. -->
+    <xacro:property name="mesh_rpy" value="0 0 0"/>
+    <xacro:property name="mesh_xyz" value="${screw_offset_x} 0 ${screw_offset_z}"/>
+    <link name="${name}_camera_center">
       <visual>
-        <origin rpy="0 0 -1.5708" xyz="0.031 0.0065 0.025"/>
+        <origin xyz="${mesh_xyz}" rpy="${mesh_rpy}"/>
         <geometry>
-          <mesh filename="package://husky_description/meshes/mount_description/ZEDM_bin.stl"
-                scale="1 1 1"/>
+          <mesh filename="package://zed_description/meshes/zedm.stl"/>
         </geometry>
-        <material name="clearpath_dark_grey"/>
+        <material name="zed_gray"/>
       </visual>
       <collision>
-        <origin rpy="0 0 -1.5708" xyz="0.031 0.0065 0.025"/>
+        <origin xyz="${mesh_xyz}" rpy="${mesh_rpy}"/>
         <geometry>
-          <box size="0.125 0.030 0.027"/>
+          <mesh filename="package://zed_description/meshes/zedm.stl"/>
         </geometry>
       </collision>
     </link>
+    <joint name="${name}_camera_center_joint" type="fixed">
+      <parent link="${name}_camera_link"/>
+      <child  link="${name}_camera_center"/>
+      <origin xyz="0 0 ${height/2}" rpy="0 ${bottom_slope} 0"/>
+    </joint>
+
+    <!-- Left camera -->
+    <link name="${name}_left_camera_frame"/>
+    <joint name="${name}_left_camera_joint" type="fixed">
+      <parent link="${name}_camera_center"/>
+      <child  link="${name}_left_camera_frame"/>
+      <origin xyz="${optical_offset_x} ${baseline/2} 0" rpy="0 0 0"/>
+    </joint>
+    <link name="${name}_left_camera_frame_optical"/>
+    <joint name="${name}_left_camera_optical_joint" type="fixed">
+      <parent link="${name}_left_camera_frame"/>
+      <child  link="${name}_left_camera_frame_optical"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
+
+    <!-- Right camera -->
+    <link name="${name}_right_camera_frame"/>
+    <joint name="${name}_right_camera_joint" type="fixed">
+      <parent link="${name}_camera_center"/>
+      <child  link="${name}_right_camera_frame"/>
+      <origin xyz="${optical_offset_x} ${-baseline/2} 0" rpy="0 0 0"/>
+    </joint>
+    <link name="${name}_right_camera_frame_optical"/>
+    <joint name="${name}_right_camera_optical_joint" type="fixed">
+      <parent link="${name}_right_camera_frame"/>
+      <child  link="${name}_right_camera_frame_optical"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
 
   </xacro:macro>
 </robot>

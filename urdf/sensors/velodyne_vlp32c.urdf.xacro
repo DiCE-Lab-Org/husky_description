@@ -1,20 +1,31 @@
 <?xml version="1.0"?>
 <!--
-  Velodyne VLP-16 3D lidar macro.
+  Velodyne VLP-32C "Ultra Puck" 3D lidar macro.
 
-  Creates ${prefix}_link (sensor body) and ${prefix}_laser (optical frame).
+  Creates ${prefix}_link (sensor body) and ${prefix}_laser (scan/optical frame).
   Gazebo gpu_lidar plugin is added when use_gazebo:=true.
+
+  Note on the mesh: the VLP-32C shares the exact same external "Puck" housing as the
+  VLP-16 (103 mm diameter body) - the 32C just packs 32 laser pairs into the same
+  shell. The official velodyne_description ships no separate VLP-32C mesh for this
+  reason. The VLP32C_*.dae meshes here are the Puck body geometry (copied from the
+  VLP-16 Puck mesh) and are dimensionally correct for the VLP-32C body.
+
+  Real VLP-32C sensing differs from the VLP-16 and IS reflected in the <sensor> block:
+    - 32 vertical channels (vs 16)
+    - asymmetric vertical FOV +15 deg .. -25 deg = 40 deg total (vs +/-15 deg)
+    - up to 200 m range (vs 130 m)
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="velodyne_vlp16"
+  <xacro:macro name="velodyne_vlp32c"
                params="prefix parent xyz:='0 0 0' rpy:='0 0 0'
                        topic:='/scan' use_gazebo:=false">
 
     <!-- Sensor body -->
     <link name="${prefix}_link">
       <inertial>
-        <mass value="0.83"/>
+        <mass value="0.925"/>  <!-- VLP-32C ~925 g (VLP-16 is 830 g) -->
         <origin xyz="0 0 0.03585"/>
         <inertia ixx="0.000908059425" ixy="0" ixz="0"
                  iyy="0.000908059425" iyz="0"
@@ -22,12 +33,12 @@
       </inertial>
       <visual>
         <geometry>
-          <mesh filename="package://husky_description/meshes/velodyne_description/meshes/VLP16_base_1.dae"/>
+          <mesh filename="package://husky_description/meshes/velodyne_description/meshes/VLP32C_base_1.dae"/>
         </geometry>
       </visual>
       <visual>
         <geometry>
-          <mesh filename="package://husky_description/meshes/velodyne_description/meshes/VLP16_base_2.dae"/>
+          <mesh filename="package://husky_description/meshes/velodyne_description/meshes/VLP32C_base_2.dae"/>
         </geometry>
       </visual>
       <collision>
@@ -44,7 +55,7 @@
       <child  link="${prefix}_link"/>
     </joint>
 
-    <!-- Laser / optical frame -->
+    <!-- Laser / scan frame -->
     <link name="${prefix}_laser">
       <inertial>
         <mass value="0.01"/>
@@ -56,7 +67,7 @@
       <visual>
         <origin xyz="0 0 -0.0377"/>
         <geometry>
-          <mesh filename="package://husky_description/meshes/velodyne_description/meshes/VLP16_scan.dae"/>
+          <mesh filename="package://husky_description/meshes/velodyne_description/meshes/VLP32C_scan.dae"/>
         </geometry>
       </visual>
     </link>
@@ -67,11 +78,11 @@
       <child  link="${prefix}_laser"/>
     </joint>
 
-    <!-- Gazebo sensor plugin -->
+    <!-- Gazebo sensor plugin (VLP-32C: 32 channels, +15..-25 deg vertical, 200 m) -->
     <xacro:if value="${use_gazebo}">
       <gazebo reference="${prefix}_laser">
         <sensor name="${prefix}" type="gpu_lidar">
-          <update_rate>50</update_rate>
+          <update_rate>20</update_rate>  <!-- VLP-32C: 5-20 Hz -->
           <visualize>true</visualize>
           <always_on>true</always_on>
           <ignition_frame_id>${prefix}_laser</ignition_frame_id>
@@ -79,21 +90,21 @@
           <lidar>
             <scan>
               <horizontal>
-                <samples>900</samples>
+                <samples>1800</samples>          <!-- ~0.2 deg azimuth resolution -->
                 <resolution>1</resolution>
                 <min_angle>-3.141592</min_angle>
                 <max_angle> 3.141592</max_angle>
               </horizontal>
               <vertical>
-                <samples>15</samples>
+                <samples>32</samples>
                 <resolution>1</resolution>
-                <min_angle>-0.261799</min_angle>
-                <max_angle> 0.261799</max_angle>
+                <min_angle>-0.436332</min_angle>  <!-- -25 deg -->
+                <max_angle> 0.261799</max_angle>  <!-- +15 deg -->
               </vertical>
             </scan>
             <range>
               <min>0.9</min>
-              <max>130.0</max>
+              <max>200.0</max>
               <resolution>0.01</resolution>
             </range>
           </lidar>

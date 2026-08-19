@@ -75,21 +75,28 @@
   <!-- =========================================================== -->
   <!--  SENSORS                                                     -->
   <!-- =========================================================== -->
-  <!-- 3D Lidar on bulkhead -->
-  <xacro:include filename="$(find husky_description)/urdf/sensors/velodyne_vlp16.urdf.xacro"/>
-  <xacro:velodyne_vlp16 prefix="lidar3d_0" parent="dual_arm_bulkhead_link"
-                        xyz="0.35545 0.0 0.19744" rpy="0 0 0"
-                        topic="/sensors/lidar3d_0/scan"
-                        use_gazebo="$(arg use_gazebo)"/>
+  <!-- 3D Lidar on bulkhead (Velodyne VLP-32C Ultra Puck) -->
+  <xacro:include filename="$(find husky_description)/urdf/sensors/velodyne_vlp32c.urdf.xacro"/>
+  <xacro:velodyne_vlp32c prefix="lidar3d_0" parent="dual_arm_bulkhead_link"
+                         xyz="0.35545 0.0 0.19744" rpy="0 0 0"
+                         topic="/sensors/lidar3d_0/scan"
+                         use_gazebo="$(arg use_gazebo)"/>
 
   <!-- Wrist mounts + Fath pivots + RealSense cameras (one chain per arm) -->
   <xacro:include filename="$(find husky_description)/urdf/accessories/wrist_mount.urdf.xacro"/>
   <xacro:include filename="$(find husky_description)/urdf/accessories/fath_pivot_mount.urdf.xacro"/>
   <xacro:include filename="$(find husky_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
 
-  <!-- Left arm camera -->
+  <!-- Left arm camera.
+       The wrist_mount joint carries the HAND-EYE CALIBRATION correction D = C * inv(N)
+       (2026-07-06), where N = nominal tool0->camera_0_link and C = measured. This
+       relocates the ENTIRE bracket (wrist_mount -> aligned -> pivot -> bottom_screw ->
+       camera_link) as a rigid body so the camera lands at the calibrated pose while
+       staying physically mounted to the bracket. The nominal chain was ~180 deg
+       mis-oriented; the correction is essentially a flip with ~0 translation, so the
+       bracket base stays on the flange and the assembly rotates to the true location. -->
   <xacro:wrist_mount prefix="arm_0_wrist_mount" parent="arm_0_tool0"
-                    xyz="0 0 0" rpy="0 0 0"
+                    xyz="-0.000107 0.004079 -0.033793" rpy="-0.072793 0.009861 3.130254"
                     mesh_rpy="0 1.5708 -1.5708"/>
   <!-- Alignment frame: lives in the rotated frame so children's poses stay valid -->
   <link name="arm_0_wrist_mount_aligned"/>
@@ -101,6 +108,9 @@
   <xacro:fath_pivot_mount prefix="arm_0_pivot" parent="arm_0_wrist_mount_aligned"
                           angle="${pi/12}"
                           xyz="-0.01615 0 0.05842" rpy="0 0 3.14159"/>
+  <!-- Camera rides the (now calibration-corrected) bracket: the wrist_mount joint
+       above carries the hand-eye correction, so this stays on the nominal pivot chain
+       and the camera + bracket move together (no floating camera). -->
   <xacro:realsense_d435 prefix="camera_0" parent="arm_0_pivot_mount"
                         xyz="0 0 0" rpy="0 0 0"
                         topic="/sensors/camera_0"
@@ -128,9 +138,20 @@
                         show_bracket="false"/>
 
 <!-- Neck ZED Mini camera (camera_2) -->
+  <!-- Local macro: EXACT official zedm frame geometry + official zed_description mesh,
+       but a gray material (official zed_camera macro hard-codes a black, non-overridable
+       material). Frame names match the ZED ROS 2 wrapper. -->
   <xacro:include filename="$(find husky_description)/urdf/sensors/zed_mini.urdf.xacro"/>
-  <xacro:zed_mini prefix="camera_2" parent="neck_0_link"
-                  xyz="0 0 0" rpy="0 0 0"/>
+  <xacro:zed_mini name="camera_2"/>
+  <!-- Mount: connect the ZED reference link (bottom screw hole) to the neck holder.
+       camera_2_camera_link is the manufacturer reference frame; everything below it
+       (camera_center, eyes, optical frames) is exact CAD and needs no tuning.
+       TODO: MEASURE this offset (neck_0_link -> ZED screw hole). Placeholder = identity. -->
+  <joint name="camera_2_mount_joint" type="fixed">
+    <parent link="neck_0_link"/>
+    <child  link="camera_2_camera_link"/>
+    <origin xyz="0.04 0.001 0.011" rpy="0 0 0"/>
+  </joint>
   <xacro:include filename="$(find husky_description)/urdf/sensors/imu.urdf.xacro"/>
   <xacro:imu_sensor prefix="imu_0" parent="base_link"
                     xyz="0 0 0" rpy="0 0 0"
